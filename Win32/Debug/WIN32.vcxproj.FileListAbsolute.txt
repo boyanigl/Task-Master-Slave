@@ -1,0 +1,1 @@
+C:\Users\shtar001\FreeRTOS\FreeRTOS\Demo\WIN32-MSVC\Win32\Debug\RTOSDemo.exe
