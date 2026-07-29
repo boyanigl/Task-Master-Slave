@@ -17,7 +17,7 @@ typedef struct {
 /* Public functions declarations */
 void StateMachine_DevB_Task(void* pvParameters);
 void StateMachine_DevB_Init(void);
-void StateMachine_DevB_Get_OutStatus(StateMachine_DevB_OutStatus* state);
-void StateMachine_DevB_Reset(void);
+boolean StateMachine_DevB_Get_OutStatus(StateMachine_DevB_OutStatus* state);
+boolean StateMachine_DevB_Reset(void);
 
 #endif

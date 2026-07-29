@@ -55,7 +55,7 @@ void StateMachine_DevA_Task(void* pvParameters) {
         prevState = currState;
 
         /* Refresh the Device B status snapshot used by this cycle's decision */
-        StateMachine_DevB_Get_OutStatus(&devBStatus);
+        (void)StateMachine_DevB_Get_OutStatus(&devBStatus);
 
         /* Master override: Device B FAULT forces Device A to ERROR regardless of current state */
         if (devBStatus.curroutState == State_Fault) {
@@ -72,9 +72,9 @@ void StateMachine_DevA_Task(void* pvParameters) {
 
         /* Fault state is configrmed for the predefined time, Master Device should reset the Slave*/
         if (devBStatus.faultConfirmed == TRUE) {
-            StateMachine_DevB_Reset();
+            (void)StateMachine_DevB_Reset();
         }
-        (void)vTaskDelay((const TickType_t )1000);
+        (void)vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
 }

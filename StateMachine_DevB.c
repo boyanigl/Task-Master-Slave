@@ -25,7 +25,7 @@ static SemaphoreHandle_t xStatusMutex = NULL;
 
 /* Local functions declarations */
 static void Dummy(void);
-static void SleepState_Do(void);;
+static void SleepState_Do(void);
 static void ActiveState_Do(void);
 static void FaultState_Do(void);
 static void SleepState_OnEntry(void);
@@ -79,31 +79,45 @@ void StateMachine_DevB_Task(void* pvParameters) {
             outStatusData.prevoutState = prevState;
             (void)xSemaphoreGive(xStatusMutex);
         }
-        vTaskDelay(1000);
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
 }
 
-void StateMachine_DevB_Get_OutStatus(StateMachine_DevB_OutStatus* pOutStatus) {
-    if (xSemaphoreTake(xStatusMutex, 10000) == pdTRUE) {
+boolean StateMachine_DevB_Get_OutStatus(StateMachine_DevB_OutStatus* pOutStatus) {
+    boolean retVal = FALSE;
+    if (xSemaphoreTake(xStatusMutex, pdMS_TO_TICKS(10000)) == pdTRUE) {
         pOutStatus->curroutState = outStatusData.curroutState;
         pOutStatus->prevoutState = outStatusData.prevoutState;
         pOutStatus->faultConfirmed = outStatusData.faultConfirmed;
+        retVal = TRUE;
 
         //release semaphore
         (void)xSemaphoreGive(xStatusMutex);
     }
     else {
-        //resource is busy for 2 long
+        /* todo: Log unable to get status */
     }
 
-
+    return retVal;
 }
 
-void StateMachine_DevB_Reset() {
-    currState = State_Sleep;
+boolean StateMachine_DevB_Reset() {
+    boolean retVal = FALSE;
+    if(xSemaphoreTake(xStatusMutex, pdMS_TO_TICKS(10000)) == pdTRUE) {
+        currState = State_Sleep;
+        (void)xSemaphoreGive(xStatusMutex);
+        retVal = TRUE;
+    }
+    else {
+        //resource is busy for 2 long
+        /* todo: Log unable to reset */
+
+    }
 
     /*todo : Log the reset event at specific time */
+
+    return retVal;
 }
 
 /* LOCAL FUNCTIONS DEFINITIONS */
@@ -138,7 +152,7 @@ static void ActiveState_OnEntry() {
 
 static void FaultState_Do() {
     if ((++consecutiveFaultCounter) >= FAULT_TRESHOLD_CONFIRMATION) {
-        if (xSemaphoreTake(xStatusMutex, 10000) == pdTRUE) {
+        if (xSemaphoreTake(xStatusMutex, pdMS_TO_TICKS(10000)) == pdTRUE) {
             outStatusData.faultConfirmed = TRUE;
             (void)xSemaphoreGive(xStatusMutex);
         }
@@ -159,7 +173,7 @@ static void FaultState_OnEntry() {
 
 static void FaultState_OnExit() {
     /* Exiting Fault State, should reset faultConfirmed status */
-    if (xSemaphoreTake(xStatusMutex, 10000) == pdTRUE) {
+    if (xSemaphoreTake(xStatusMutex, pdMS_TO_TICKS(10000)) == pdTRUE) {
         outStatusData.faultConfirmed = FALSE;
         (void)xSemaphoreGive(xStatusMutex);
     }
