@@ -137,8 +137,11 @@ static void SleepState_Do() {
     //Increment timer
     timerStates++;
     if (timerStates >= TIMER_TIME_ALLOWED) {
-        //semaphore logic
-        currState = State_Active;
+#ifdef TEST3_DEVB_SLEEP_TO_FAULT
+            currState = State_Fault;
+#else
+            currState = State_Active;
+#endif
     }
 }
 

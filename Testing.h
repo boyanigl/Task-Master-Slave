@@ -1,0 +1,8 @@
+#ifndef TESTING_H
+#define TESTING_H
+
+#define TEST1_DEVB_SELFHEALING
+//#define TEST2_DEVA_RESETS
+//#define TEST3_DEVB_SLEEP_TO_FAULT
+
+#endif

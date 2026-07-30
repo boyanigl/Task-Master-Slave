@@ -130,6 +130,7 @@
     <ClInclude Include="StateMachine_DevA.h" />
     <ClInclude Include="StateMachine_DevB.h" />
     <ClInclude Include="StateMachine_DevB_Cfg.h" />
+    <ClInclude Include="Testing.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="Trace_Recorder_Configuration\trcConfig.h" />
     <ClInclude Include="Trace_Recorder_Configuration\trcKernelPortConfig.h" />

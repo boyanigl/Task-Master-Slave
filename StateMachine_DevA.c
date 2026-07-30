@@ -117,7 +117,6 @@ void ErrorState_Do() {
         currState = State_Idle;
     }else{
         /* Still in FAULT */
-        Log_Event(LOG_WARNING, "DEVA", "Device B still in FAULT - waiting for recovery");
     }
 }
 

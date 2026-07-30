@@ -165,6 +165,9 @@
     <ClInclude Include="StateMachine_DevB_Cfg.h">
       <Filter>StateMachine\StateMachine_DevB</Filter>
     </ClInclude>
+    <ClInclude Include="Testing.h">
+      <Filter>StateMachine\StateMachine_DevB</Filter>
+    </ClInclude>
     <ClInclude Include="Logger.h">
       <Filter>Logger</Filter>
     </ClInclude>
