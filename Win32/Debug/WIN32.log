@@ -1,4 +1,0 @@
-﻿  main.c
-C:\Users\shtar001\FreeRTOS\FreeRTOS\Demo\WIN32-MSVC\main.c(215,9): warning C4057: 'function': 'LPTHREAD_START_ROUTINE' differs in indirection to slightly different base types from 'int32_t (__stdcall *)(void *)'
-C:\Users\shtar001\FreeRTOS\FreeRTOS\Demo\WIN32-MSVC\main.c(543,1): warning C4702: unreachable code
-  WIN32.vcxproj -> C:\Users\shtar001\FreeRTOS\FreeRTOS\Demo\WIN32-MSVC\Win32\Debug\RTOSDemo.exe
