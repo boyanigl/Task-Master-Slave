@@ -134,7 +134,4 @@ extern void vAssertCalled( unsigned long ulLine, const char * const pcFileName )
     #include <winsock.h>
 #endif /* WIN32_LEAN_AND_MEAN */
 
-/* Include the FreeRTOS+Trace FreeRTOS trace macro definitions. */
-#include "trcRecorder.h"
-
 #endif /* FREERTOS_CONFIG_H */

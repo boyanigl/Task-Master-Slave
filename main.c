@@ -34,9 +34,8 @@
  *******************************************************************************
  * NOTE: Windows will not be running the FreeRTOS demo threads continuously, so
  * do not expect to get real time behaviour from the FreeRTOS Windows port, or
- * this demo application.  Also, the timing information in the FreeRTOS+Trace
- * logs have no meaningful units.  See the documentation page for the Windows
- * port for further information:
+ * this demo application.  See the documentation page for the Windows port for
+ * further information:
  * https://www.FreeRTOS.org/FreeRTOS-Windows-Simulator-Emulator-for-Visual-Studio-and-Eclipse-MingW.html
  *
  *
@@ -65,9 +64,6 @@
 #define mainREGION_2_SIZE                     239050
 #define mainREGION_3_SIZE                     168070
 
-/* This demo allows to save a trace file. */
-#define mainTRACE_FILE_NAME                   "Trace.dump"
-
 /*-----------------------------------------------------------*/
 
 /*
@@ -94,12 +90,6 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
                                      StackType_t ** ppxTimerTaskStackBuffer,
                                      uint32_t * pulTimerTaskStackSize );
 
-/*
- * Writes trace data to a disk file when the trace recording is stopped.
- * This function will simply overwrite any trace files that already exist.
- */
-static void prvSaveTraceFile( void );
-
 /*-----------------------------------------------------------*/
 
 /* When configSUPPORT_STATIC_ALLOCATION is set to 1 the application writer can
@@ -117,22 +107,6 @@ int main( void )
      * is only used for test and example reasons.  Heap_4 is more appropriate.  See
      * http://www.freertos.org/a00111.html for an explanation. */
     prvInitialiseHeap();
-
-    /* Initialise the trace recorder.  Use of the trace recorder is optional.
-     * See http://www.FreeRTOS.org/trace for more information. */
-
-    configASSERT( xTraceInitialize() == TRC_SUCCESS );
-
-    /* Start the trace recording - the recording is written to a file if
-     * configASSERT() is called. */
-    printf(
-        "Trace started.\r\n"
-        "The trace will be dumped to the file \"%s\" whenever a call to configASSERT() fails.\r\n"
-        "Note that the trace output uses the ring buffer mode, meaning that the output trace\r\n"
-        "will only be the most recent data able to fit within the trace recorder buffer.\r\n",
-        mainTRACE_FILE_NAME );
-
-    configASSERT( xTraceEnable( TRC_START ) == TRC_SUCCESS );
 
     /* Initializations of the Logger and the two state machines. */
     Log_Init();
@@ -232,10 +206,6 @@ void vAssertCalled( unsigned long ulLine,
     {
         printf( "ASSERT! Line %ld, file %s, GetLastError() %ld\r\n", ulLine, pcFileName, GetLastError() );
 
-        /* Stop the trace recording and save the trace. */
-        ( void ) xTraceDisable();
-        prvSaveTraceFile();
-
         /* Cause debugger break point if being debugged. */
         __debugbreak();
 
@@ -246,30 +216,8 @@ void vAssertCalled( unsigned long ulLine,
         {
              __nop();
         }
-
-        /* Re-enable the trace recording. */
-        ( void ) xTraceEnable( TRC_START );
     }
     taskEXIT_CRITICAL();
-}
-/*-----------------------------------------------------------*/
-
-static void prvSaveTraceFile( void )
-{
-    FILE * pxOutputFile;
-
-    fopen_s( &pxOutputFile, mainTRACE_FILE_NAME, "wb" );
-
-    if( pxOutputFile != NULL )
-    {
-        fwrite( RecorderDataPtr, sizeof( RecorderDataType ), 1, pxOutputFile );
-        fclose( pxOutputFile );
-        printf( "\r\nTrace output saved to %s\r\n\r\n", mainTRACE_FILE_NAME );
-    }
-    else
-    {
-        printf( "\r\nFailed to create trace dump file\r\n\r\n" );
-    }
 }
 /*-----------------------------------------------------------*/
 
@@ -357,23 +305,4 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
      * Note that, as the array is necessarily of type StackType_t,
      * configMINIMAL_STACK_SIZE is specified in words, not bytes. */
     *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
-}
-/*-----------------------------------------------------------*/
-
-/* The below code is used by the trace recorder for timing. */
-static uint32_t ulEntryTime = 0;
-
-void vTraceTimerReset( void )
-{
-    ulEntryTime = xTaskGetTickCount();
-}
-
-uint32_t uiTraceTimerGetFrequency( void )
-{
-    return configTICK_RATE_HZ;
-}
-
-uint32_t uiTraceTimerGetValue( void )
-{
-    return( xTaskGetTickCount() - ulEntryTime );
 }

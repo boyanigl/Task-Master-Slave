@@ -44,7 +44,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\Source\include;..\..\Source\portable\MSVC-MingW;..\Common\Include;..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-Trace\kernelports\FreeRTOS;..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-Trace\kernelports\FreeRTOS\include;..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-Trace\include;.\Trace_Recorder_Configuration;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>FreeRTOS-Kernel\include;FreeRTOS-Kernel\portable\MSVC-MingW;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;WIN32_LEAN_AND_MEAN;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0601;WINVER=0x400;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -75,34 +75,32 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\Source\include;..\..\Source\portable\MSVC-MingW;..\Common\Include;..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-Trace\kernelports\FreeRTOS;..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-Trace\kernelports\FreeRTOS\include;..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-Trace\include;.\Trace_Recorder_Configuration;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>FreeRTOS-Kernel\include;FreeRTOS-Kernel\portable\MSVC-MingW;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-Trace\kernelports\FreeRTOS\trcKernelPort.c" />
-    <ClCompile Include="..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-Trace\trcSnapshotRecorder.c" />
-    <ClCompile Include="..\..\Source\croutine.c" />
-    <ClCompile Include="..\..\Source\event_groups.c" />
-    <ClCompile Include="..\..\Source\portable\MemMang\heap_5.c" />
-    <ClCompile Include="..\..\Source\stream_buffer.c" />
-    <ClCompile Include="..\..\Source\timers.c" />
+    <ClCompile Include="FreeRTOS-Kernel\croutine.c" />
+    <ClCompile Include="FreeRTOS-Kernel\event_groups.c" />
+    <ClCompile Include="FreeRTOS-Kernel\portable\MemMang\heap_5.c" />
+    <ClCompile Include="FreeRTOS-Kernel\stream_buffer.c" />
+    <ClCompile Include="FreeRTOS-Kernel\timers.c" />
     <ClCompile Include="main.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="..\..\Source\list.c">
+    <ClCompile Include="FreeRTOS-Kernel\list.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="..\..\Source\portable\MSVC-MingW\port.c">
+    <ClCompile Include="FreeRTOS-Kernel\portable\MSVC-MingW\port.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="..\..\Source\queue.c">
+    <ClCompile Include="FreeRTOS-Kernel\queue.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="..\..\Source\tasks.c">
+    <ClCompile Include="FreeRTOS-Kernel\tasks.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -111,31 +109,25 @@
     <ClCompile Include="Logger.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-Trace\Include\trcKernelPort.h" />
-    <ClInclude Include="..\..\..\FreeRTOS-Plus\Source\FreeRTOS-Plus-Trace\Include\trcRecorder.h" />
-    <ClInclude Include="..\..\Source\include\event_groups.h" />
-    <ClInclude Include="..\..\Source\include\message_buffer.h" />
-    <ClInclude Include="..\..\Source\include\stream_buffer.h" />
-    <ClInclude Include="..\..\Source\include\timers.h" />
-    <ClInclude Include="..\..\Source\portable\MSVC-MingW\portmacro.h" />
+    <ClInclude Include="FreeRTOS-Kernel\include\event_groups.h" />
+    <ClInclude Include="FreeRTOS-Kernel\include\message_buffer.h" />
+    <ClInclude Include="FreeRTOS-Kernel\include\stream_buffer.h" />
+    <ClInclude Include="FreeRTOS-Kernel\include\timers.h" />
+    <ClInclude Include="FreeRTOS-Kernel\portable\MSVC-MingW\portmacro.h" />
     <ClInclude Include="FreeRTOSConfig.h" />
-    <ClInclude Include="..\..\Source\include\croutine.h" />
-    <ClInclude Include="..\..\Source\include\FreeRTOS.h" />
-    <ClInclude Include="..\..\Source\include\list.h" />
-    <ClInclude Include="..\..\Source\include\portable.h" />
-    <ClInclude Include="..\..\Source\include\projdefs.h" />
-    <ClInclude Include="..\..\Source\include\queue.h" />
-    <ClInclude Include="..\..\Source\include\semphr.h" />
-    <ClInclude Include="..\..\Source\include\task.h" />
+    <ClInclude Include="FreeRTOS-Kernel\include\croutine.h" />
+    <ClInclude Include="FreeRTOS-Kernel\include\FreeRTOS.h" />
+    <ClInclude Include="FreeRTOS-Kernel\include\list.h" />
+    <ClInclude Include="FreeRTOS-Kernel\include\portable.h" />
+    <ClInclude Include="FreeRTOS-Kernel\include\projdefs.h" />
+    <ClInclude Include="FreeRTOS-Kernel\include\queue.h" />
+    <ClInclude Include="FreeRTOS-Kernel\include\semphr.h" />
+    <ClInclude Include="FreeRTOS-Kernel\include\task.h" />
     <ClInclude Include="StateMachine_DevA.h" />
     <ClInclude Include="StateMachine_DevB.h" />
     <ClInclude Include="StateMachine_DevB_Cfg.h" />
     <ClInclude Include="Testing.h" />
     <ClInclude Include="Logger.h" />
-    <ClInclude Include="Trace_Recorder_Configuration\trcConfig.h" />
-    <ClInclude Include="Trace_Recorder_Configuration\trcKernelPortConfig.h" />
-    <ClInclude Include="Trace_Recorder_Configuration\trcKernelPortSnapshotConfig.h" />
-    <ClInclude Include="Trace_Recorder_Configuration\trcSnapshotConfig.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
