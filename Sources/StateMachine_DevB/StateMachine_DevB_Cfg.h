@@ -16,7 +16,7 @@
 #define FAULT_RECOVERY_TIME 30         /* DevA still confirms and resets after the direct jump into FAULT */
 #define SLEEP_TRANSITIONS_TO_FAULT 1   /* SLEEP exits straight to FAULT instead of ACTIVE, skipping DevA's IDLE->PROCESSING path entirely */
 #else
-#error "No DevB test scenario selected in Testing.h"
+#error "No Device test scenario selected in Testing.h"
 #endif
 
 #endif

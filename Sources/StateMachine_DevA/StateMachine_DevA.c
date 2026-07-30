@@ -41,6 +41,9 @@ static const pFuncAct stateMatrix[State_DevA_Last][3] = {
 void StateMachine_DevA_Init(void) {
     currState = State_Idle;
     prevState = State_Idle;
+
+    /* First OnEnter action for Idle state*/
+    stateMatrix[currState][Action_OnEn]();
 }
 
 void StateMachine_DevA_Task(void* pvParameters) {
@@ -59,23 +62,20 @@ void StateMachine_DevA_Task(void* pvParameters) {
 
         /* Refresh the Device B status snapshot */
         if (StateMachine_DevB_Get_OutStatus(&devBStatus) != TRUE) {
-            Log_Event(LOG_WARNING, "DEVA", "Failed to read Device B status (mutex busy) - using stale data");
+            Log_Event(LOG_ERROR, "DEVA", "Failed to read Device B status (mutex busy) - using stale data");
         }
 
         /* Fault state is configrmed for the predefined time, Master Device should reset the Slave*/
         if (devBStatus.faultConfirmed == TRUE) {
             Log_Event(LOG_WARNING, "DEVA", "Device B FAULT confirmed - issuing reset");
             if (StateMachine_DevB_Reset() != TRUE) {
-                Log_Event(LOG_WARNING, "DEVA", "Device B reset failed (mutex busy)");
+                Log_Event(LOG_ERROR, "DEVA", "Device B reset failed (mutex busy)");
             }
         }
 
         /* Execute the current state do activity - it decides its own next state */
         stateMatrix[currState][Action_Do]();
 
-        /* Print current state of DevA */
-        printf("DevA- State : ");
-        printf("%d\n", currState);
         (void)vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
@@ -122,5 +122,5 @@ void ErrorState_Do() {
 }
 
 void ErrorState_OnEntry() {
-    Log_Event(LOG_ERROR, "DEVA", "Entered ERROR (Device B FAULT)");
+    Log_Event(LOG_WARNING, "DEVA", "Entered ERROR (Device B FAULT)");
 }

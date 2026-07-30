@@ -54,6 +54,7 @@
 #include "StateMachine_DevA.h"
 #include "StateMachine_DevB.h"
 #include "Logger.h"
+#include "Testing.h"
 
 /* This demo uses heap_5.c, and these constants define the sizes of the regions
  * that make up the total heap.  heap_5 is only used for test and example purposes
@@ -110,8 +111,21 @@ int main( void )
 
     /* Initializations of the Logger and the two state machines. */
     Log_Init();
+
+#if defined(TEST1_DEVB_SELFHEALING)
+    Log_Event(LOG_INFO, "CFG", "TEST 1 - Device B self-heals after 5s(preconfigured)");
+#elif defined(TEST2_DEVA_RESETS)
+    Log_Event(LOG_INFO, "CFG", "TEST 2 - Device A resets Device B after the fault state is confirmed(preconfigured value)");
+#elif defined(TEST3_DEVB_SLEEP_TO_FAULT)
+    Log_Event(LOG_INFO, "CFG", "TEST 3 - Device B goes to Fault state from Sleep");
+#else
+#error "No DevB test scenario selected in Testing.h"
+#endif
+
     StateMachine_DevA_Init();
     StateMachine_DevB_Init();
+
+
 
     /* Create the Device A (master) and Device B (slave) state machine tasks. */
     xTaskCreate(StateMachine_DevA_Task, "STM_DEVA", configMINIMAL_STACK_SIZE, NULL, 2, NULL);

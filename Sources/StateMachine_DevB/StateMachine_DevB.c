@@ -50,6 +50,9 @@ void StateMachine_DevB_Init(void) {
     currState = State_Sleep;
     prevState = State_Sleep;
 
+    /* Explicition invokation OnEnter action for Sleep state*/
+    stateMatrix[currState][Action_OnEn]();
+
     xStatusMutex = xSemaphoreCreateMutex();
     configASSERT(xStatusMutex != NULL);
 }
@@ -81,9 +84,6 @@ void StateMachine_DevB_Task(void* pvParameters) {
             (void)xSemaphoreGive(xStatusMutex);
         }
 
-        /* Print current state of DevB */
-        printf("DevB- State : ");
-        printf("%d\n", currState);
 
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
@@ -102,7 +102,7 @@ boolean StateMachine_DevB_Get_OutStatus(StateMachine_DevB_OutStatus* pOutStatus)
         (void)xSemaphoreGive(xStatusMutex);
     }
     else {
-        Log_Event(LOG_WARNING, "DEVB", "Status read failed (mutex busy)");
+        Log_Event(LOG_ERROR, "DEVB", "Status read failed (mutex busy)");
     }
 
     return retVal;
@@ -114,10 +114,10 @@ boolean StateMachine_DevB_Reset() {
         currState = State_Sleep;
         (void)xSemaphoreGive(xStatusMutex);
         retVal = TRUE;
-        Log_Event(LOG_INFO, "DEVB", "Reset accepted - returning to SLEEP");
+        Log_Event(LOG_WARNING, "DEVB", "Reset accepted - returning to SLEEP");
     }
     else {
-        Log_Event(LOG_WARNING, "DEVB", "Reset failed (mutex busy)");
+        Log_Event(LOG_ERROR, "DEVB", "Reset failed (mutex busy)");
     }
 
     return retVal;
@@ -170,7 +170,7 @@ static void FaultState_Do() {
 }
 
 static void FaultState_OnEntry() {
-    Log_Event(LOG_ERROR, "DEVB", "Entered FAULT");
+    Log_Event(LOG_WARNING, "DEVB", "Entered FAULT");
     consecutiveFaultCounter = 0u;
     timerStates = 0u;
 }
@@ -179,4 +179,7 @@ static void FaultState_OnExit() {
     /* Exiting Fault State, should reset faultConfirmed status.
      * Called only from StateMachine_DevB_Task while xStatusMutex is already held. */
     outStatusData.faultConfirmed = FALSE;
+
+    Log_Event(LOG_WARNING, "DEVB", "Slave device has been healed/reset");
+
 }
