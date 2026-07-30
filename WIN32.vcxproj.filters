@@ -40,7 +40,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.c">
+    <ClCompile Include="Sources\main.c">
       <Filter>Demo App Source</Filter>
     </ClCompile>
     <ClCompile Include="FreeRTOS-Kernel\list.c">
@@ -70,18 +70,18 @@
     <ClCompile Include="FreeRTOS-Kernel\stream_buffer.c">
       <Filter>FreeRTOS Source\Source</Filter>
     </ClCompile>
-    <ClCompile Include="StateMachine_DevA.c">
+    <ClCompile Include="Sources\StateMachine_DevA\StateMachine_DevA.c">
       <Filter>StateMachine\StateMachine_DevA</Filter>
     </ClCompile>
-    <ClCompile Include="StateMachine_DevB.c">
+    <ClCompile Include="Sources\StateMachine_DevB\StateMachine_DevB.c">
       <Filter>StateMachine\StateMachine_DevB</Filter>
     </ClCompile>
-    <ClCompile Include="Logger.c">
+    <ClCompile Include="Sources\Logger\Logger.c">
       <Filter>Logger</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FreeRTOSConfig.h">
+    <ClInclude Include="Sources\FreeRTOSConfig.h">
       <Filter>Configuration Files</Filter>
     </ClInclude>
     <ClInclude Include="FreeRTOS-Kernel\include\croutine.h">
@@ -123,22 +123,22 @@
     <ClInclude Include="FreeRTOS-Kernel\include\stream_buffer.h">
       <Filter>FreeRTOS Source\Include</Filter>
     </ClInclude>
-    <ClInclude Include="StateMachine_DevA.h">
+    <ClInclude Include="Sources\StateMachine_DevA\StateMachine_DevA.h">
       <Filter>StateMachine\StateMachine_DevA</Filter>
     </ClInclude>
-    <ClInclude Include="StateMachine_DevB.h">
+    <ClInclude Include="Sources\StateMachine_DevB\StateMachine_DevB.h">
       <Filter>StateMachine\StateMachine_DevB</Filter>
     </ClInclude>
-    <ClInclude Include="Types.h">
+    <ClInclude Include="Sources\Types.h">
       <Filter>StateMachine</Filter>
     </ClInclude>
-    <ClInclude Include="StateMachine_DevB_Cfg.h">
+    <ClInclude Include="Sources\StateMachine_DevB\StateMachine_DevB_Cfg.h">
       <Filter>StateMachine\StateMachine_DevB</Filter>
     </ClInclude>
-    <ClInclude Include="Testing.h">
+    <ClInclude Include="Sources\Testing.h">
       <Filter>StateMachine\StateMachine_DevB</Filter>
     </ClInclude>
-    <ClInclude Include="Logger.h">
+    <ClInclude Include="Sources\Logger\Logger.h">
       <Filter>Logger</Filter>
     </ClInclude>
   </ItemGroup>

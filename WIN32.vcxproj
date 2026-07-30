@@ -44,7 +44,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>FreeRTOS-Kernel\include;FreeRTOS-Kernel\portable\MSVC-MingW;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>FreeRTOS-Kernel\include;FreeRTOS-Kernel\portable\MSVC-MingW;Sources;Sources\Logger;Sources\StateMachine_DevA;Sources\StateMachine_DevB;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;WIN32_LEAN_AND_MEAN;_DEBUG;_CONSOLE;_WIN32_WINNT=0x0601;WINVER=0x400;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -75,7 +75,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>FreeRTOS-Kernel\include;FreeRTOS-Kernel\portable\MSVC-MingW;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>FreeRTOS-Kernel\include;FreeRTOS-Kernel\portable\MSVC-MingW;Sources;Sources\Logger;Sources\StateMachine_DevA;Sources\StateMachine_DevB;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -84,7 +84,7 @@
     <ClCompile Include="FreeRTOS-Kernel\portable\MemMang\heap_5.c" />
     <ClCompile Include="FreeRTOS-Kernel\stream_buffer.c" />
     <ClCompile Include="FreeRTOS-Kernel\timers.c" />
-    <ClCompile Include="main.c">
+    <ClCompile Include="Sources\main.c">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -104,9 +104,9 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="StateMachine_DevA.c" />
-    <ClCompile Include="StateMachine_DevB.c" />
-    <ClCompile Include="Logger.c" />
+    <ClCompile Include="Sources\StateMachine_DevA\StateMachine_DevA.c" />
+    <ClCompile Include="Sources\StateMachine_DevB\StateMachine_DevB.c" />
+    <ClCompile Include="Sources\Logger\Logger.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FreeRTOS-Kernel\include\event_groups.h" />
@@ -114,7 +114,7 @@
     <ClInclude Include="FreeRTOS-Kernel\include\stream_buffer.h" />
     <ClInclude Include="FreeRTOS-Kernel\include\timers.h" />
     <ClInclude Include="FreeRTOS-Kernel\portable\MSVC-MingW\portmacro.h" />
-    <ClInclude Include="FreeRTOSConfig.h" />
+    <ClInclude Include="Sources\FreeRTOSConfig.h" />
     <ClInclude Include="FreeRTOS-Kernel\include\croutine.h" />
     <ClInclude Include="FreeRTOS-Kernel\include\FreeRTOS.h" />
     <ClInclude Include="FreeRTOS-Kernel\include\list.h" />
@@ -123,12 +123,12 @@
     <ClInclude Include="FreeRTOS-Kernel\include\queue.h" />
     <ClInclude Include="FreeRTOS-Kernel\include\semphr.h" />
     <ClInclude Include="FreeRTOS-Kernel\include\task.h" />
-    <ClInclude Include="StateMachine_DevA.h" />
-    <ClInclude Include="StateMachine_DevB.h" />
-    <ClInclude Include="StateMachine_DevB_Cfg.h" />
-    <ClInclude Include="Testing.h" />
-    <ClInclude Include="Logger.h" />
-    <ClInclude Include="Types.h" />
+    <ClInclude Include="Sources\StateMachine_DevA\StateMachine_DevA.h" />
+    <ClInclude Include="Sources\StateMachine_DevB\StateMachine_DevB.h" />
+    <ClInclude Include="Sources\StateMachine_DevB\StateMachine_DevB_Cfg.h" />
+    <ClInclude Include="Sources\Testing.h" />
+    <ClInclude Include="Sources\Logger\Logger.h" />
+    <ClInclude Include="Sources\Types.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
