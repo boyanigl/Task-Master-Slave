@@ -64,17 +64,17 @@ void StateMachine_DevB_Task(void* pvParameters) {
          * can write currState from Device A's task at any time. */
         if (xSemaphoreTake(xStatusMutex, portMAX_DELAY) == pdTRUE) {
 
-            /* If change in state is catched - run the OnExit activity of previous state and OnEntry activity on current */
-            if (currState != prevState) {
-                stateMatrix[prevState][Action_OnEx]();
-                stateMatrix[currState][Action_OnEn]();
-            }
-
             /* Update the prevState var for next execution of task */
             prevState = currState;
 
             /* Execute the current state do activity */
             stateMatrix[currState][Action_Do]();
+
+            /* If change in state is catched - run the OnExit activity of previous state and OnEntry activity on current */
+            if (currState != prevState) {
+                stateMatrix[prevState][Action_OnEx]();
+                stateMatrix[currState][Action_OnEn]();
+            }
 
             outStatusData.curroutState = currState;
             outStatusData.prevoutState = prevState;
