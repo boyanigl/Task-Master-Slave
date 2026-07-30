@@ -50,6 +50,9 @@
     <Filter Include="StateMachine\StateMachine_DevB">
       <UniqueIdentifier>{ba6554b7-f9ee-4527-9a07-2f55e1db4a04}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Logger">
+      <UniqueIdentifier>{0981a29c-5164-495e-bbb6-3fb5005e77da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -181,6 +184,9 @@
     <ClCompile Include="StateMachine_DevB.c">
       <Filter>StateMachine\StateMachine_DevB</Filter>
     </ClCompile>
+    <ClCompile Include="Logger.c">
+      <Filter>Logger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FreeRTOSConfig.h">
@@ -254,6 +260,9 @@
     </ClInclude>
     <ClInclude Include="StateMachine_DevB_Cfg.h">
       <Filter>StateMachine\StateMachine_DevB</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger.h">
+      <Filter>Logger</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

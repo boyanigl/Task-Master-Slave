@@ -6,6 +6,7 @@
 
 #include "StateMachine_DevB.h"
 #include "StateMachine_DevB_Cfg.h"
+#include "Logger.h"
 
 /* Pointer function to a transition activity - OnEntry - During - OnExit */
 typedef void (*pFuncAct)(void);
@@ -50,35 +51,41 @@ void StateMachine_DevB_Init(void) {
     prevState = State_Sleep;
 
     xStatusMutex = xSemaphoreCreateMutex();
+    configASSERT(xStatusMutex != NULL);
 }
 
 void StateMachine_DevB_Task(void* pvParameters) {
+    (void)pvParameters;
 
     for (; ; ) {
 
-        /* If change in state is catched - run the OnExit activity of previous state and OnEntry activity on current */
-        if (currState != prevState) {
-            stateMatrix[prevState][Action_OnEx]();
-            stateMatrix[currState][Action_OnEn]();
+        /* currState/prevState/timerStates/consecutiveFaultCounter and outStatusData are
+         * treated as one protected unit for the whole cycle, since StateMachine_DevB_Reset()
+         * can write currState from Device A's task at any time. */
+        if (xSemaphoreTake(xStatusMutex, portMAX_DELAY) == pdTRUE) {
+
+            /* If change in state is catched - run the OnExit activity of previous state and OnEntry activity on current */
+            if (currState != prevState) {
+                stateMatrix[prevState][Action_OnEx]();
+                stateMatrix[currState][Action_OnEn]();
+            }
+
+            /* Update the prevState var for next execution of task */
+            prevState = currState;
+
+            /* Execute the current state do activity */
+            stateMatrix[currState][Action_Do]();
+
+            outStatusData.curroutState = currState;
+            outStatusData.prevoutState = prevState;
+
+            (void)xSemaphoreGive(xStatusMutex);
         }
-
-        /* Update the prevState var for next execution of task */
-        prevState = currState;
-
-        /* Execute the current state do activity */
-        stateMatrix[currState][Action_Do]();
-
 
         /* Print current state of DevB */
         printf("DevB- State : ");
         printf("%d\n", currState);
 
-
-        if (xSemaphoreTake(xStatusMutex, portMAX_DELAY) == pdTRUE) {
-            outStatusData.curroutState = currState;
-            outStatusData.prevoutState = prevState;
-            (void)xSemaphoreGive(xStatusMutex);
-        }
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
@@ -96,7 +103,7 @@ boolean StateMachine_DevB_Get_OutStatus(StateMachine_DevB_OutStatus* pOutStatus)
         (void)xSemaphoreGive(xStatusMutex);
     }
     else {
-        /* todo: Log unable to get status */
+        Log_Event(LOG_WARNING, "DEVB", "Status read failed (mutex busy)");
     }
 
     return retVal;
@@ -108,14 +115,11 @@ boolean StateMachine_DevB_Reset() {
         currState = State_Sleep;
         (void)xSemaphoreGive(xStatusMutex);
         retVal = TRUE;
+        Log_Event(LOG_INFO, "DEVB", "Reset applied - returning to SLEEP");
     }
     else {
-        //resource is busy for 2 long
-        /* todo: Log unable to reset */
-
+        Log_Event(LOG_WARNING, "DEVB", "Reset failed (mutex busy)");
     }
-
-    /*todo : Log the reset event at specific time */
 
     return retVal;
 }
@@ -125,8 +129,8 @@ static void Dummy() {
     /* dummy implementation */
 }
 static void SleepState_OnEntry() {
+    Log_Event(LOG_INFO, "DEVB", "Entered SLEEP");
     timerStates = 0u;
-
 }
 
 static void SleepState_Do() {
@@ -147,34 +151,30 @@ static void ActiveState_Do() {
 }
 
 static void ActiveState_OnEntry() {
+    Log_Event(LOG_INFO, "DEVB", "Entered ACTIVE");
     timerStates = 0u;
 }
 
 static void FaultState_Do() {
+    /* Called only from StateMachine_DevB_Task while xStatusMutex is already held. */
     if ((++consecutiveFaultCounter) >= FAULT_TRESHOLD_CONFIRMATION) {
-        if (xSemaphoreTake(xStatusMutex, pdMS_TO_TICKS(10000)) == pdTRUE) {
-            outStatusData.faultConfirmed = TRUE;
-            (void)xSemaphoreGive(xStatusMutex);
-        }
+        outStatusData.faultConfirmed = TRUE;
     }
 
     timerStates++;
-    if (timerStates >= 30) {
+    if (timerStates >= FAULT_RECOVERY_TIME) {
         currState = State_Sleep;
     }
 }
 
 static void FaultState_OnEntry() {
-    /* todo: Log fault */
-    /* Log state changed to Fault */
+    Log_Event(LOG_ERROR, "DEVB", "Entered FAULT");
     consecutiveFaultCounter = 0u;
     timerStates = 0u;
 }
 
 static void FaultState_OnExit() {
-    /* Exiting Fault State, should reset faultConfirmed status */
-    if (xSemaphoreTake(xStatusMutex, pdMS_TO_TICKS(10000)) == pdTRUE) {
-        outStatusData.faultConfirmed = FALSE;
-        (void)xSemaphoreGive(xStatusMutex);
-    }
+    /* Exiting Fault State, should reset faultConfirmed status.
+     * Called only from StateMachine_DevB_Task while xStatusMutex is already held. */
+    outStatusData.faultConfirmed = FALSE;
 }

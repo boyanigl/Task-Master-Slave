@@ -5,6 +5,7 @@
 #include "semphr.h"
 #include "StateMachine_DevA.h"
 #include "StateMachine_DevB.h"
+#include "Logger.h"
 
 /* Pointer function to a transition activity - OnEntry - During - OnExit */
 typedef void (*pFuncAct)(void);
@@ -55,7 +56,9 @@ void StateMachine_DevA_Task(void* pvParameters) {
         prevState = currState;
 
         /* Refresh the Device B status snapshot used by this cycle's decision */
-        (void)StateMachine_DevB_Get_OutStatus(&devBStatus);
+        if (StateMachine_DevB_Get_OutStatus(&devBStatus) != TRUE) {
+            Log_Event(LOG_WARNING, "DEVA", "Failed to read Device B status (mutex busy) - using stale data");
+        }
 
         /* Master override: Device B FAULT forces Device A to ERROR regardless of current state */
         if (devBStatus.curroutState == State_Fault) {
@@ -72,7 +75,10 @@ void StateMachine_DevA_Task(void* pvParameters) {
 
         /* Fault state is configrmed for the predefined time, Master Device should reset the Slave*/
         if (devBStatus.faultConfirmed == TRUE) {
-            (void)StateMachine_DevB_Reset();
+            Log_Event(LOG_WARNING, "DEVA", "Device B FAULT confirmed - issuing reset");
+            if (StateMachine_DevB_Reset() != TRUE) {
+                Log_Event(LOG_WARNING, "DEVA", "Device B reset failed (mutex busy)");
+            }
         }
         (void)vTaskDelay(pdMS_TO_TICKS(1000));
     }
@@ -83,7 +89,7 @@ void Dummy() {
     /* dummy implementation */
 }
 void IdleState_OnEntry() {
-
+    Log_Event(LOG_INFO, "DEVA", "Entered IDLE");
 }
 
 void IdleState_Do() {
@@ -101,7 +107,7 @@ void ProcessingState_Do() {
 }
 
 void ProcessingState_OnEntry() {
-
+    Log_Event(LOG_INFO, "DEVA", "Entered PROCESSING");
 }
 
 void ErrorState_Do() {
@@ -112,5 +118,5 @@ void ErrorState_Do() {
 }
 
 void ErrorState_OnEntry() {
-    /* Log state changed to Error */
+    Log_Event(LOG_ERROR, "DEVA", "Entered ERROR (Device B FAULT)");
 }

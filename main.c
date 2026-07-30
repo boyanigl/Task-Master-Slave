@@ -67,6 +67,7 @@
 /* SHTAR001 - CUSTOM LIBS*/
 #include "StateMachine_DevA.h"
 #include "StateMachine_DevB.h"
+#include "Logger.h"
 
 /* This project provides two demo applications.  A simple blinky style demo
  * application, and a more comprehensive test and demo application.  The
@@ -221,6 +222,7 @@ int main( void )
     SetThreadAffinityMask( xWindowsKeyboardInputThreadHandle, ~0x01u );
 
     //BGS Initializations of STMs
+    Log_Init();
     StateMachine_DevA_Init();
     StateMachine_DevB_Init();
 
