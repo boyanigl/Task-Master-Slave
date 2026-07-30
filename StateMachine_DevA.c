@@ -47,6 +47,13 @@ void StateMachine_DevA_Task(void* pvParameters) {
     (void)pvParameters;
 
     for (; ;) {
+
+        /* If change in state is catched - run the OnExit activity of previous state and OnEntry activity on current */
+        if (currState != prevState) {
+            stateMatrix[prevState][Action_OnEx]();
+            stateMatrix[currState][Action_OnEn]();
+        }
+
         /* Update the prevState var for next execution of task */
         prevState = currState;
 
@@ -55,17 +62,6 @@ void StateMachine_DevA_Task(void* pvParameters) {
             Log_Event(LOG_WARNING, "DEVA", "Failed to read Device B status (mutex busy) - using stale data");
         }
 
-        /* Execute the current state do activity - it decides its own next state */
-        stateMatrix[currState][Action_Do]();
-
-        /* If change in state is catched - run the OnExit activity of previous state and OnEntry activity on current */
-        if (currState != prevState) {
-            stateMatrix[prevState][Action_OnEx]();
-            stateMatrix[currState][Action_OnEn]();
-        }
-
-
-
         /* Fault state is configrmed for the predefined time, Master Device should reset the Slave*/
         if (devBStatus.faultConfirmed == TRUE) {
             Log_Event(LOG_WARNING, "DEVA", "Device B FAULT confirmed - issuing reset");
@@ -73,6 +69,9 @@ void StateMachine_DevA_Task(void* pvParameters) {
                 Log_Event(LOG_WARNING, "DEVA", "Device B reset failed (mutex busy)");
             }
         }
+
+        /* Execute the current state do activity - it decides its own next state */
+        stateMatrix[currState][Action_Do]();
 
         /* Print current state of DevA */
         printf("DevA- State : ");
