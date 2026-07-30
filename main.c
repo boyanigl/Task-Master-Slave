@@ -25,15 +25,11 @@
  */
 
 /******************************************************************************
- * This project provides two demo applications.  A simple blinky style project,
- * and a more comprehensive test and demo application.  The
- * mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is used to select between the two.
- * The simply blinky demo is implemented and described in main_blinky.c.  The
- * more comprehensive test and demo application is implemented and described in
- * main_full.c.
+ * Master-Slave State Synchronization demo: creates the Device A (master) and
+ * Device B (slave) state machine tasks on the FreeRTOS Windows simulator.
  *
- * This file implements the code that is not demo specific, including the
- * hardware setup and FreeRTOS hook functions.
+ * This file implements the code that is not state-machine specific, including
+ * the hardware setup and FreeRTOS hook functions.
  *
  *******************************************************************************
  * NOTE: Windows will not be running the FreeRTOS demo threads continuously, so
@@ -49,15 +45,6 @@
 
 /* Standard includes. */
 #include <stdio.h>
-#include <stdlib.h>
-#include <conio.h>
-
-#ifdef WIN32_LEAN_AND_MEAN
-    #include "winsock2.h"
-#else
-    #include <winsock.h>
-#endif /* WIN32_LEAN_AND_MEAN */
-
 
 /* FreeRTOS kernel includes. */
 #include "FreeRTOS.h"
@@ -69,18 +56,6 @@
 #include "StateMachine_DevB.h"
 #include "Logger.h"
 
-/* This project provides two demo applications.  A simple blinky style demo
- * application, and a more comprehensive test and demo application.  The
- * mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is used to select between the two.
- *
- * If mainCREATE_SIMPLE_BLINKY_DEMO_ONLY is 1 then the blinky demo will be built.
- * The blinky demo is implemented and described in main_blinky.c.
- *
- * If mainCREATE_SIMPLE_BLINKY_DEMO_ONLY is not 1 then the comprehensive test and
- * demo application will be built.  The comprehensive test and demo application is
- * implemented and described in main_full.c. */
-#define mainCREATE_SIMPLE_BLINKY_DEMO_ONLY    0
-
 /* This demo uses heap_5.c, and these constants define the sizes of the regions
  * that make up the total heap.  heap_5 is only used for test and example purposes
  * as this demo could easily create one large heap region instead of multiple
@@ -90,29 +65,10 @@
 #define mainREGION_2_SIZE                     239050
 #define mainREGION_3_SIZE                     168070
 
-/* This demo allows for users to perform actions with the keyboard. */
-#define mainNO_KEY_PRESS_VALUE                -1
-#define mainOUTPUT_TRACE_KEY                  't'
-#define mainINTERRUPT_NUMBER_KEYBOARD         3
-
 /* This demo allows to save a trace file. */
 #define mainTRACE_FILE_NAME                   "Trace.dump"
 
 /*-----------------------------------------------------------*/
-
-/*
- * main_blinky() is used when mainCREATE_SIMPLE_BLINKY_DEMO_ONLY is set to 1.
- * main_full() is used when mainCREATE_SIMPLE_BLINKY_DEMO_ONLY is set to 0.
- */
-extern void main_blinky( void );
-extern void main_full( void );
-
-/*
- * Only the comprehensive demo uses application hook (callback) functions.  See
- * https://www.FreeRTOS.org/a00016.html for more information.
- */
-extern void vFullDemoTickHookFunction( void );
-extern void vFullDemoIdleFunction( void );
 
 /*
  * This demo uses heap_5.c, so start by defining some heap regions.  It is not
@@ -144,23 +100,6 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
  */
 static void prvSaveTraceFile( void );
 
-/*
- * Windows thread function to capture keyboard input from outside of the
- * FreeRTOS simulator. This thread passes data safely into the FreeRTOS
- * simulator using a stream buffer.
- */
-static int32_t WINAPI prvWindowsKeyboardInputThread( void * pvParam );
-
-/*
- * Interrupt handler for when keyboard input is received.
- */
-static uint32_t prvKeyboardInterruptHandler( void );
-
-/*
- * Keyboard interrupt handler for the blinky demo.
- */
-extern void vBlinkyKeyboardInterruptHandler( int xKeyPressed );
-
 /*-----------------------------------------------------------*/
 
 /* When configSUPPORT_STATIC_ALLOCATION is set to 1 the application writer can
@@ -169,16 +108,6 @@ extern void vBlinkyKeyboardInterruptHandler( int xKeyPressed );
  * declared here, as a global, so it can be checked by a test that is implemented
  * in a different file. */
 StackType_t uxTimerTaskStack[ configTIMER_TASK_STACK_DEPTH ];
-
-
-/* Thread handle for the keyboard input Windows thread. */
-static HANDLE xWindowsKeyboardInputThreadHandle = NULL;
-
-/* This stores the last key pressed that has not been handled.
- * Keyboard input is retrieved by the prvWindowsKeyboardInputThread
- * Windows thread and stored here. This is then read by the idle
- * task and handled appropriately. */
-static int xKeyPressed = mainNO_KEY_PRESS_VALUE;
 
 /*-----------------------------------------------------------*/
 
@@ -198,59 +127,24 @@ int main( void )
      * configASSERT() is called. */
     printf(
         "Trace started.\r\n"
-        "The trace will be dumped to the file \"%s\" whenever a call to configASSERT()\r\n"
-        "fails or the \'%c\' key is pressed.\r\n"
+        "The trace will be dumped to the file \"%s\" whenever a call to configASSERT() fails.\r\n"
         "Note that the trace output uses the ring buffer mode, meaning that the output trace\r\n"
         "will only be the most recent data able to fit within the trace recorder buffer.\r\n",
-        mainTRACE_FILE_NAME, mainOUTPUT_TRACE_KEY );
+        mainTRACE_FILE_NAME );
 
     configASSERT( xTraceEnable( TRC_START ) == TRC_SUCCESS );
 
-    /* Set interrupt handler for keyboard input. */
-    vPortSetInterruptHandler( mainINTERRUPT_NUMBER_KEYBOARD, prvKeyboardInterruptHandler );
-
-    /* Start keyboard input handling thread. */
-    xWindowsKeyboardInputThreadHandle = CreateThread(
-        NULL,                          /* Pointer to thread security attributes. */
-        0,                             /* Initial thread stack size, in bytes. */
-        prvWindowsKeyboardInputThread, /* Pointer to thread function. */
-        NULL,                          /* Argument for new thread. */
-        0,                             /* Creation flags. */
-        NULL );
-
-    /* Use the cores that are not used by the FreeRTOS tasks for the Windows thread. */
-    SetThreadAffinityMask( xWindowsKeyboardInputThreadHandle, ~0x01u );
-
-    //BGS Initializations of STMs
+    /* Initializations of the Logger and the two state machines. */
     Log_Init();
     StateMachine_DevA_Init();
     StateMachine_DevB_Init();
 
-
-    //BGS
-    //Manually added StateMachine Tasks
+    /* Create the Device A (master) and Device B (slave) state machine tasks. */
     xTaskCreate(StateMachine_DevA_Task, "STM_DEVA", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
     xTaskCreate(StateMachine_DevB_Task, "STM_DEVB", configMINIMAL_STACK_SIZE, NULL, 3, NULL);
 
-
-
     /* Start the scheduler itself. */
     vTaskStartScheduler();
-
-    ///* The mainCREATE_SIMPLE_BLINKY_DEMO_ONLY setting is described at the top
-    // * of this file. */
-    //#if ( mainCREATE_SIMPLE_BLINKY_DEMO_ONLY == 1 )
-    //{
-    //    printf( "\nStarting the blinky demo.\r\n" );
-    //    main_blinky();
-    //}
-    //#else
-    //{
-    //    printf( "\nStarting the full demo.\r\n" );
-    //    main_full();
-
-    //}
-    //#endif /* if ( mainCREATE_SIMPLE_BLINKY_DEMO_ONLY == 1 ) */
 
     return 0;
 }
@@ -280,19 +174,8 @@ void vApplicationIdleHook( void )
      * to 1 in FreeRTOSConfig.h.  It will be called on each iteration of the idle
      * task.  It is essential that code added to this hook function never attempts
      * to block in any way (for example, call xQueueReceive() with a block time
-     * specified, or call vTaskDelay()).  If application tasks make use of the
-     * vTaskDelete() API function to delete themselves then it is also important
-     * that vApplicationIdleHook() is permitted to return to its calling function,
-     * because it is the responsibility of the idle task to clean up memory
-     * allocated by the kernel to any task that has since deleted itself. */
-
-    #if ( mainCREATE_SIMPLE_BLINKY_DEMO_ONLY != 1 )
-    {
-        /* Call the idle task processing used by the full demo.  The simple
-         * blinky demo does not use the idle task hook. */
-        vFullDemoIdleFunction();
-    }
-    #endif
+     * specified, or call vTaskDelay()).  This demo has nothing to do in the idle
+     * task. */
 }
 
 /*-----------------------------------------------------------*/
@@ -318,13 +201,8 @@ void vApplicationTickHook( void )
     * configUSE_TICK_HOOK is set to 1 in FreeRTOSConfig.h.  User code can be
     * added here, but the tick hook is called from an interrupt context, so
     * code must not attempt to block, and only the interrupt safe FreeRTOS API
-    * functions can be used (those that end in FromISR()). */
-
-    #if ( mainCREATE_SIMPLE_BLINKY_DEMO_ONLY != 1 )
-    {
-//        vFullDemoTickHookFunction();
-    }
-    #endif /* mainCREATE_SIMPLE_BLINKY_DEMO_ONLY */
+    * functions can be used (those that end in FromISR()).  This demo has
+    * nothing to do in the tick hook. */
 }
 /*-----------------------------------------------------------*/
 
@@ -480,71 +358,6 @@ void vApplicationGetTimerTaskMemory( StaticTask_t ** ppxTimerTaskTCBBuffer,
      * configMINIMAL_STACK_SIZE is specified in words, not bytes. */
     *pulTimerTaskStackSize = configTIMER_TASK_STACK_DEPTH;
 }
-/*-----------------------------------------------------------*/
-
-/*
- * Interrupt handler for when keyboard input is received.
- */
-static uint32_t prvKeyboardInterruptHandler( void )
-{
-    /* Handle keyboard input. */
-    switch( xKeyPressed )
-    {
-        case mainNO_KEY_PRESS_VALUE:
-            break;
-
-        case mainOUTPUT_TRACE_KEY:
-
-            /* Saving the trace file requires Windows system calls, so enter a critical
-             * section to prevent deadlock or errors resulting from calling a Windows
-             * system call from within the FreeRTOS simulator. */
-            portENTER_CRITICAL();
-            {
-                ( void ) xTraceDisable();
-                prvSaveTraceFile();
-                ( void ) xTraceEnable( TRC_START );
-            }
-            portEXIT_CRITICAL();
-            break;
-
-        default:
-            #if ( mainCREATE_SIMPLE_BLINKY_DEMO_ONLY == 1 )
-                /* Call the keyboard interrupt handler for the blinky demo. */
-                vBlinkyKeyboardInterruptHandler( xKeyPressed );
-            #endif
-            break;
-    }
-
-    /* This interrupt does not require a context switch so return pdFALSE */
-    return pdFALSE;
-}
-
-/*-----------------------------------------------------------*/
-
-/*
- * Windows thread function to capture keyboard input from outside of the
- * FreeRTOS simulator. This thread passes data into the simulator using
- * an integer.
- */
-static int32_t WINAPI prvWindowsKeyboardInputThread( void * pvParam )
-{
-    ( void ) pvParam;
-
-    for( ; ; )
-    {
-        /* Block on acquiring a key press. */
-        xKeyPressed = _getch();
-
-        /* Notify FreeRTOS simulator that there is a keyboard interrupt.
-         * This will trigger prvKeyboardInterruptHandler.
-         */
-        vPortGenerateSimulatedInterrupt( mainINTERRUPT_NUMBER_KEYBOARD );
-    }
-
-    /* Should not get here so return negative exit status. */
-    return -1;
-}
-
 /*-----------------------------------------------------------*/
 
 /* The below code is used by the trace recorder for timing. */

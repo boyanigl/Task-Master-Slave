@@ -80,13 +80,8 @@
 
 #define configMAX_PRIORITIES					( 7 )
 
-/* Run time stats gathering configuration options. */
-#define configRUN_TIME_COUNTER_TYPE				uint64_t
-configRUN_TIME_COUNTER_TYPE ulGetRunTimeCounterValue( void ); /* Prototype of function that returns run time counter. */
-void vConfigureTimerForRunTimeStats( void );	/* Prototype of function that initialises the run time counter. */
-#define configGENERATE_RUN_TIME_STATS			1
-#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS() vConfigureTimerForRunTimeStats()
-#define portGET_RUN_TIME_COUNTER_VALUE() ulGetRunTimeCounterValue()
+/* Run time stats gathering is not used by this demo. */
+#define configGENERATE_RUN_TIME_STATS			0
 
 /* Co-routine related configuration options. */
 #define configUSE_CO_ROUTINES 					1

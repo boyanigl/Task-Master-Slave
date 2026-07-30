@@ -55,18 +55,13 @@ void StateMachine_DevA_Task(void* pvParameters) {
         /* Update the prevState var for next execution of task */
         prevState = currState;
 
-        /* Refresh the Device B status snapshot used by this cycle's decision */
+        /* Refresh the Device B status snapshot */
         if (StateMachine_DevB_Get_OutStatus(&devBStatus) != TRUE) {
             Log_Event(LOG_WARNING, "DEVA", "Failed to read Device B status (mutex busy) - using stale data");
         }
 
-        /* Master override: Device B FAULT forces Device A to ERROR regardless of current state */
-        if (devBStatus.curroutState == State_Fault) {
-            currState = State_Error;
-        } else {
-            /* Execute the current state do activity - it decides its own next state */
-            stateMatrix[currState][Action_Do]();
-        }
+        /* Execute the current state do activity - it decides its own next state */
+        stateMatrix[currState][Action_Do]();
 
         /* Print current state of DevA */
         printf("DevA- State : ");
@@ -96,6 +91,9 @@ void IdleState_Do() {
     /* React to Device B becoming ACTIVE by starting processing */
     if (devBStatus.curroutState == State_Active) {
         currState = State_Processing;
+    }else if (devBStatus.curroutState == State_Fault) {
+        /* React to Device B becoming FAULT by entering error state */
+        currState = State_Error;
     }
 }
 
@@ -103,6 +101,9 @@ void ProcessingState_Do() {
     /* Device B returned to SLEEP - consider processing complete */
     if (devBStatus.curroutState == State_Sleep) {
         currState = State_Idle;
+    }else if (devBStatus.curroutState == State_Fault) {
+        /* React to Device B becoming FAULT by entering error state */
+        currState = State_Error;
     }
 }
 
@@ -114,6 +115,9 @@ void ErrorState_Do() {
     /* Recover once Device B is no longer in FAULT */
     if (devBStatus.curroutState != State_Fault) {
         currState = State_Idle;
+    }else{
+        /* Still in FAULT */
+        Log_Event(LOG_WARNING, "DEVA", "Device B still in FAULT - waiting for recovery");
     }
 }
 
